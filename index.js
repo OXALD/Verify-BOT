@@ -1,15 +1,12 @@
-const Discord = require('discord.js');
-const client = new Discord.Client();
-const { MessageButton, MessageActionRow } = require('discord-buttons');
-require('discord-buttons')(client);
+const { Client, Intents, MessageActionRow, MessageButton } = require('discord.js');
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
 const CHANNEL_ID = '1274443859207655434'; // ID del canal
-const VERIFY_ROLE_ID = '1274192724073119774'; // ID del rol de verificación
-const ERROR_ROLE_ID = '1274448805982375977'; // ID del rol que causa error
+const ROLE_ID = '1274451737335300198'; // ID del rol para bots con permisos
+const BOT_TOKEN = 'MTI3NDQ0ODgwNTk4MjM3NTk3Nw.GhBEZu.UKnVL4pgh6rxIjpswrWNywZqsGKxrhOp0B08ak'; // Token del bot
 
 client.once('ready', () => {
     console.log('Bot online');
-    client.user.setActivity('Verificando usuarios');
 
     const channel = client.channels.cache.get(CHANNEL_ID);
     if (!channel) {
@@ -17,56 +14,57 @@ client.once('ready', () => {
         return;
     }
 
-    const embed = new Discord.MessageEmbed()
-        .setTitle("¡Bienvenido!")
-        .setDescription("Por favor, verifica haciendo clic en el botón de abajo.")
-        .setColor('#38A800');
+    const embed = {
+        title: "¡Bienvenido!",
+        description: "Por favor, verifica haciendo clic en el botón de abajo.",
+        color: '#38A800'
+    };
 
     const verifyButton = new MessageButton()
+        .setCustomId('verify_button')
         .setLabel('Verificar')
-        .setStyle('blurple')
-        .setEmoji('✅')
-        .setID('verify_button');
+        .setStyle('PRIMARY')
+        .setEmoji('✅');
 
     const row = new MessageActionRow()
         .addComponents(verifyButton);
 
     channel.send({
-        embed: embed,
+        embeds: [embed],
         components: [row]
     }).catch(console.error);
 });
 
-client.on('clickButton', async (button) => {
-    if (button.id === 'verify_button') {
-        const role = button.guild.roles.cache.get(VERIFY_ROLE_ID);
-        const member = button.clicker.member;
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isButton()) return;
+
+    if (interaction.customId === 'verify_button') {
+        const role = interaction.guild.roles.cache.get(ROLE_ID);
+        const member = interaction.member;
 
         if (!role) {
-            button.reply.send('Rol de verificación no encontrado.', true);
+            await interaction.reply({ content: 'Rol de verificación no encontrado.', ephemeral: true });
             return;
         }
 
         if (!member) {
-            button.reply.send('Miembro no encontrado.', true);
+            await interaction.reply({ content: 'Miembro no encontrado.', ephemeral: true });
             return;
         }
 
         try {
-            // Verificar si el bot tiene el permiso para gestionar roles
-            if (!button.guild.me.permissions.has('MANAGE_ROLES')) {
-                button.reply.send('No tengo permiso para asignar roles.', true);
+            if (!interaction.guild.me.permissions.has('MANAGE_ROLES')) {
+                await interaction.reply({ content: 'No tengo permiso para asignar roles.', ephemeral: true });
                 return;
             }
 
-            // Intentar añadir el rol de verificación
             await member.roles.add(role);
-            button.reply.send('¡Ahora estás verificado!', true);
+            await interaction.reply({ content: '¡Ahora estás verificado!', ephemeral: true });
         } catch (error) {
-            button.reply.send('Hubo un error al asignar el rol.', true);
+            await interaction.reply({ content: 'Hubo un error al asignar el rol.', ephemeral: true });
             console.error('Error al añadir el rol:', error);
         }
     }
 });
 
-client.login('TU_TOKEN_DEL_BOT'); // Reemplaza con tu token
+client.login(BOT_TOKEN);

@@ -1,9 +1,8 @@
 const { Client, Intents, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_CONTENT] });
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
 const CHANNEL_ID = '1274443859207655434'; // ID del canal
 const VERIFY_ROLE_ID = '1274192724073119774'; // ID del rol para verificación exitosa
-const ERROR_ROLE_ID = '1274448805982375977'; // ID del rol que causa error
 const BOT_ROLE_ID = '1274448949885014100'; // ID del rol que el bot debe tener al iniciar
 
 client.once('ready', async () => {
@@ -20,13 +19,19 @@ client.once('ready', async () => {
     const botRole = guild.roles.cache.get(BOT_ROLE_ID);
     if (!botRole) {
         console.error(`Rol con ID ${BOT_ROLE_ID} no encontrado.`);
-    } else {
-        try {
-            await guild.me.roles.add(botRole);
-            console.log('Rol asignado al bot.');
-        } catch (error) {
-            console.error('Error al asignar el rol al bot:', error);
-        }
+        return;
+    }
+
+    if (!guild.me.permissions.has('MANAGE_ROLES')) {
+        console.error('El bot no tiene permisos para gestionar roles.');
+        return;
+    }
+
+    try {
+        await guild.me.roles.add(botRole);
+        console.log('Rol asignado al bot.');
+    } catch (error) {
+        console.error('Error al asignar el rol al bot:', error);
     }
 
     const channel = client.channels.cache.get(CHANNEL_ID);

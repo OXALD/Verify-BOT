@@ -1,97 +1,53 @@
-const { Client, Intents, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+require('dotenv').config();
+const Discord = require('discord.js');
+const bot = new Discord.Client();
 
-const CHANNEL_ID = '1274443859207655434'; // ID del canal
-const VERIFY_ROLE_ID = '1274192724073119774'; // ID del rol para verificación exitosa
-const BOT_ROLE_ID = '1274448949885014100'; // ID del rol que el bot debe tener al iniciar
+const VERIFICATION_CHANNEL_ID = '1274443859207655434';
+const VERIFIED_ROLE_ID = '1274445003669635204';
+const VERIFY_EMOJI = '✅'; // Cambia esto por el emoji que quieres usar para la verificación
 
-client.once('ready', async () => {
-    console.log('Bot online');
-    client.user.setActivity('Verificando usuarios');
+bot.on('ready', async () => {
+    console.log('[BOT] Ready.');
+    await bot.user.setStatus('online');
+    await bot.user.setActivity('!verify', { type: 'PLAYING' });
 
-    const guild = client.guilds.cache.first();
-    if (!guild) {
-        console.error('No se pudo encontrar el servidor.');
-        return;
+    const channel = bot.channels.cache.get(VERIFICATION_CHANNEL_ID);
+    if (channel) {
+        const verificationEmbed = new Discord.MessageEmbed()
+            .setTitle('**Verification**')
+            .setDescription(`Reacciona con ${VERIFY_EMOJI} para verificarte.`)
+            .setColor('#00FF00');
+        
+        const message = await channel.send(verificationEmbed);
+        await message.react(VERIFY_EMOJI);
+        console.log('[BOT] Verification message sent.');
+    } else {
+        console.error('[ERROR] Verification channel not found.');
     }
-
-    // Asignar rol al bot
-    const botRole = guild.roles.cache.get(BOT_ROLE_ID);
-    if (!botRole) {
-        console.error(`Rol con ID ${BOT_ROLE_ID} no encontrado.`);
-        return;
-    }
-
-    if (!guild.me.permissions.has('MANAGE_ROLES')) {
-        console.error('El bot no tiene permisos para gestionar roles.');
-        return;
-    }
-
-    try {
-        await guild.me.roles.add(botRole);
-        console.log('Rol asignado al bot.');
-    } catch (error) {
-        console.error('Error al asignar el rol al bot:', error);
-    }
-
-    const channel = client.channels.cache.get(CHANNEL_ID);
-    if (!channel) {
-        console.error(`Canal con ID ${CHANNEL_ID} no encontrado.`);
-        return;
-    }
-
-    const embed = new MessageEmbed()
-        .setTitle("¡Bienvenido!")
-        .setDescription("Por favor, verifica haciendo clic en el botón de abajo.")
-        .setColor('#38A800');
-
-    const verifyButton = new MessageButton()
-        .setLabel('Verificar')
-        .setStyle('PRIMARY')
-        .setEmoji('✅')
-        .setCustomId('verify_button');
-
-    const row = new MessageActionRow()
-        .addComponents(verifyButton);
-
-    channel.send({
-        embeds: [embed],
-        components: [row]
-    }).catch(console.error);
 });
 
-client.on('interactionCreate', async (interaction) => {
-    if (!interaction.isButton()) return;
+bot.on('messageReactionAdd', async (reaction, user) => {
+    if (reaction.message.channel.id === VERIFICATION_CHANNEL_ID && reaction.emoji.name === VERIFY_EMOJI) {
+        if (user.bot) return; // Ignorar reacciones de bots
 
-    if (interaction.customId === 'verify_button') {
-        const role = interaction.guild.roles.cache.get(VERIFY_ROLE_ID);
-        const member = interaction.member;
-
-        if (!role) {
-            await interaction.reply({ content: 'Rol de verificación no encontrado.', ephemeral: true });
-            return;
-        }
-
-        if (!member) {
-            await interaction.reply({ content: 'Miembro no encontrado.', ephemeral: true });
-            return;
-        }
-
-        try {
-            // Verificar si el bot tiene el permiso para gestionar roles
-            if (!interaction.guild.me.permissions.has('MANAGE_ROLES')) {
-                await interaction.reply({ content: 'No tengo permiso para asignar roles.', ephemeral: true });
-                return;
+        const member = await reaction.message.guild.members.fetch(user.id);
+        if (member) {
+            const verifiedRole = reaction.message.guild.roles.cache.get(VERIFIED_ROLE_ID);
+            if (verifiedRole) {
+                await member.roles.add(verifiedRole);
+                console.log(`[VERIFIED] ${user.tag} has been verified.`);
+                
+                const verifiedEmbed = new Discord.MessageEmbed()
+                    .setTitle('**Verification successful!**')
+                    .setDescription('You have been verified!')
+                    .setColor('#00FF00');
+                
+                await user.send(verifiedEmbed);
+            } else {
+                console.error('[ERROR] Verified role not found.');
             }
-
-            // Intentar añadir el rol de verificación
-            await member.roles.add(role);
-            await interaction.reply({ content: '¡Ahora estás verificado!', ephemeral: true });
-        } catch (error) {
-            await interaction.reply({ content: 'Hubo un error al asignar el rol.', ephemeral: true });
-            console.error('Error al añadir el rol:', error);
         }
     }
 });
 
-client.login('TU_TOKEN_DEL_BOT'); // Reemplaza con tu token
+bot.login(process.env.TOKEN);

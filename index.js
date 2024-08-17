@@ -1,9 +1,9 @@
-const { Client, Intents, MessageActionRow, MessageButton } = require('discord.js');
+const { Client, Intents, MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
 const CHANNEL_ID = '1274443859207655434'; // ID del canal
 const ROLE_ID = '1274451737335300198'; // ID del rol para bots con permisos
-const BOT_TOKEN = 'MTI3NDQ0ODgwNTk4MjM3NTk3Nw.GhBEZu.UKnVL4pgh6rxIjpswrWNywZqsGKxrhOp0B08ak'; // Token del bot
+const BOT_TOKEN = 'YOUR_BOT_TOKEN'; // Reemplaza con tu token de bot
 
 client.once('ready', () => {
     console.log('Bot online');
@@ -14,11 +14,10 @@ client.once('ready', () => {
         return;
     }
 
-    const embed = {
-        title: "¡Bienvenido!",
-        description: "Por favor, verifica haciendo clic en el botón de abajo.",
-        color: '#38A800'
-    };
+    const embed = new MessageEmbed()
+        .setTitle("¡Bienvenido!")
+        .setDescription("Por favor, verifica haciendo clic en el botón de abajo.")
+        .setColor('#38A800');
 
     const verifyButton = new MessageButton()
         .setCustomId('verify_button')

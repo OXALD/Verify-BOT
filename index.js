@@ -14,7 +14,8 @@ bot.once('ready', async () => {
             .setTitle('Verification')
             .setDescription('React with the checkmark to verify yourself!')
             .setColor('#00FF00')
-            .setThumbnail('https://cdn.discordapp.com/attachments/933093366483267655/1257802712246911047/EVOS_SUPPORT.png'); // URL de la imagen pequeña
+            .setThumbnail('https://cdn.discordapp.com/attachments/933093366483267655/1257802712246911047/EVOS_SUPPORT.png') // URL de la imagen pequeña
+            .setFooter({ text: 'Bot Verification' }); // Añadido pie de página para mayor claridad
 
         try {
             const message = await channel.send({ embeds: [initialEmbed] });
@@ -44,7 +45,7 @@ bot.on('messageCreate', async (msg) => {
                 console.log('[VERIFIED] Member verified.');
                 await msg.delete({ timeout: 5000 });
             } catch (error) {
-                console.error('Error processing verification:', error);
+                console.error('Error during verification:', error);
             }
         } else {
             console.error('Member or role not found');

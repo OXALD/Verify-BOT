@@ -3,8 +3,9 @@ const client = new Discord.Client();
 const { MessageButton, MessageActionRow } = require('discord-buttons');
 require('discord-buttons')(client);
 
-const CHANNEL_ID = '1274443859207655434'; // Reemplaza con el ID del canal
-const ROLE_ID = '1274445003669635204'; // Reemplaza con el ID del rol
+const CHANNEL_ID = '1274443859207655434'; // ID del canal
+const VERIFY_ROLE_ID = '1274192724073119774'; // ID del rol de verificación
+const ERROR_ROLE_ID = '1274448805982375977'; // ID del rol que causa error
 
 client.once('ready', () => {
     console.log('Bot online');
@@ -38,11 +39,11 @@ client.once('ready', () => {
 
 client.on('clickButton', async (button) => {
     if (button.id === 'verify_button') {
-        const role = button.guild.roles.cache.get(ROLE_ID);
+        const role = button.guild.roles.cache.get(VERIFY_ROLE_ID);
         const member = button.clicker.member;
 
         if (!role) {
-            button.reply.send('Rol no encontrado.', true);
+            button.reply.send('Rol de verificación no encontrado.', true);
             return;
         }
 
@@ -52,12 +53,13 @@ client.on('clickButton', async (button) => {
         }
 
         try {
-            // Verificar que el bot tenga el permiso para gestionar roles
-            if (!member.hasPermission('MANAGE_ROLES')) {
+            // Verificar si el bot tiene el permiso para gestionar roles
+            if (!button.guild.me.permissions.has('MANAGE_ROLES')) {
                 button.reply.send('No tengo permiso para asignar roles.', true);
                 return;
             }
 
+            // Intentar añadir el rol de verificación
             await member.roles.add(role);
             button.reply.send('¡Ahora estás verificado!', true);
         } catch (error) {
@@ -67,4 +69,4 @@ client.on('clickButton', async (button) => {
     }
 });
 
-client.login('TU_TOKEN_DEL_BOT'); // Reemplaza con el token de tu bot
+client.login('TU_TOKEN_DEL_BOT'); // Reemplaza con tu token

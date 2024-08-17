@@ -9,8 +9,7 @@ const ROLE_ID = '1274445003669635204'; // Reemplaza con el ID del rol
 client.once('ready', () => {
     console.log('Bot online');
     client.user.setActivity('Verificando usuarios');
-    
-    // Enviar el mensaje de verificación al canal específico
+
     const channel = client.channels.cache.get(CHANNEL_ID);
     if (!channel) {
         console.error(`Canal con ID ${CHANNEL_ID} no encontrado.`);
@@ -53,6 +52,12 @@ client.on('clickButton', async (button) => {
         }
 
         try {
+            // Verificar que el bot tenga el permiso para gestionar roles
+            if (!member.hasPermission('MANAGE_ROLES')) {
+                button.reply.send('No tengo permiso para asignar roles.', true);
+                return;
+            }
+
             await member.roles.add(role);
             button.reply.send('¡Ahora estás verificado!', true);
         } catch (error) {

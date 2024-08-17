@@ -63,27 +63,27 @@ client.on('interactionCreate', async (interaction) => {
         const member = interaction.member;
 
         if (!role) {
-            await interaction.reply('Rol de verificación no encontrado.', { ephemeral: true });
+            await interaction.reply({ content: 'Rol de verificación no encontrado.', ephemeral: true });
             return;
         }
 
         if (!member) {
-            await interaction.reply('Miembro no encontrado.', { ephemeral: true });
+            await interaction.reply({ content: 'Miembro no encontrado.', ephemeral: true });
             return;
         }
 
         try {
             // Verificar si el bot tiene el permiso para gestionar roles
             if (!interaction.guild.me.permissions.has('MANAGE_ROLES')) {
-                await interaction.reply('No tengo permiso para asignar roles.', { ephemeral: true });
+                await interaction.reply({ content: 'No tengo permiso para asignar roles.', ephemeral: true });
                 return;
             }
 
             // Intentar añadir el rol de verificación
             await member.roles.add(role);
-            await interaction.reply('¡Ahora estás verificado!', { ephemeral: true });
+            await interaction.reply({ content: '¡Ahora estás verificado!', ephemeral: true });
         } catch (error) {
-            await interaction.reply('Hubo un error al asignar el rol.', { ephemeral: true });
+            await interaction.reply({ content: 'Hubo un error al asignar el rol.', ephemeral: true });
             console.error('Error al añadir el rol:', error);
         }
     }

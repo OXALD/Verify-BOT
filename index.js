@@ -2,50 +2,47 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const bot = new Discord.Client();
 
-const VERIFICATION_CHANNEL_ID = '1274443859207655434';
-const VERIFIED_ROLE_ID = '1274445003669635204';
-const VERIFY_EMOJI = '✅'; // Cambia esto por el emoji que quieres usar para la verificación
-
 bot.on('ready', async () => {
     console.log('[BOT] Ready.');
     await bot.user.setStatus('online');
-    await bot.user.setActivity('!verify', { type: 'PLAYING' });
+    await bot.user.setActivity(`!verify`, { type: 'PLAYING' });
 
-    const channel = bot.channels.cache.get(VERIFICATION_CHANNEL_ID);
+    // Enviar un mensaje inicial con una imagen pequeña en el canal especificado
+    const channel = bot.channels.cache.get('1274443859207655434');
     if (channel) {
-        const verificationEmbed = new Discord.MessageEmbed()
-            .setTitle('**Verification**')
-            .setDescription(`Reacciona con ${VERIFY_EMOJI} para verificarte.`)
-            .setColor('#00FF00');
-        
-        const message = await channel.send(verificationEmbed);
-        await message.react(VERIFY_EMOJI);
-        console.log('[BOT] Verification message sent.');
+        const initialEmbed = new Discord.MessageEmbed()
+            .setTitle('Verification')
+            .setDescription('React with the checkmark to verify yourself!')
+            .setColor('#00FF00')
+            .setThumbnail('https://example.com/your-image.png'); // URL de la imagen pequeña
+
+        channel.send({ embeds: [initialEmbed] })
+            .then(message => {
+                message.react('✅'); // Emoji de verificación
+            })
+            .catch(console.error);
     } else {
-        console.error('[ERROR] Verification channel not found.');
+        console.error('Channel not found');
     }
 });
 
-bot.on('messageReactionAdd', async (reaction, user) => {
-    if (reaction.message.channel.id === VERIFICATION_CHANNEL_ID && reaction.emoji.name === VERIFY_EMOJI) {
-        if (user.bot) return; // Ignorar reacciones de bots
+bot.on('messageCreate', async (msg) => {
+    if (msg.content === '!verify') {
+        const verifiedEmbed = new Discord.MessageEmbed()
+            .setTitle('**Verification successful!**')
+            .setDescription('You have been verified!')
+            .setColor('#00FF00')
+            .setThumbnail('https://example.com/your-image.png'); // URL de la imagen pequeña
 
-        const member = await reaction.message.guild.members.fetch(user.id);
-        if (member) {
-            const verifiedRole = reaction.message.guild.roles.cache.get(VERIFIED_ROLE_ID);
-            if (verifiedRole) {
-                await member.roles.add(verifiedRole);
-                console.log(`[VERIFIED] ${user.tag} has been verified.`);
-                
-                const verifiedEmbed = new Discord.MessageEmbed()
-                    .setTitle('**Verification successful!**')
-                    .setDescription('You have been verified!')
-                    .setColor('#00FF00');
-                
-                await user.send(verifiedEmbed);
-            } else {
-                console.error('[ERROR] Verified role not found.');
-            }
+        const verifiedRole = msg.guild.roles.cache.get('1274445003669635204');
+        if (msg.member && verifiedRole) {
+            msg.member.roles.add(verifiedRole);
+            msg.react('✅');
+            msg.author.send({ embeds: [verifiedEmbed] });
+            console.log('[VERIFIED] Member verified.');
+            msg.delete({ timeout: 5000 });
+        } else {
+            console.error('Member or role not found');
         }
     }
 });

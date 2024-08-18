@@ -33,8 +33,8 @@ client.once('ready', async () => {
 
             if (role) {
                 await member.roles.add(role);
-                await user.send(`¡Has sido verificado y se te ha asignado el rol!`); // Mensaje privado al usuario
-                await channel.send(`${user.username} ha sido verificado.`);
+                await user.send(`¡Has sido verificado y se te ha asignado el rol!`);
+                // No se envía el mensaje al canal
             }
         });
 
@@ -44,8 +44,8 @@ client.once('ready', async () => {
 
             if (role) {
                 await member.roles.remove(role);
-                await user.send(`Has quitado tu verificación y se te ha removido el rol.`); // Mensaje privado al usuario
-                await channel.send(`${user.username} ha quitado su verificación.`);
+                await user.send(`Has quitado tu verificación y se te ha removido el rol.`);
+                // No se envía el mensaje al canal
             }
         });
     } else {

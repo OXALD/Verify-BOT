@@ -1,37 +1,54 @@
 require('dotenv').config();
-const Discord = require('discord.js');
-const bot = new Discord.Client();
+const { Client, GatewayIntentBits } = require('discord.js');
 
-bot.on('ready', async () => {
-    console.log('[BOT] Ready.');
-    await bot.user.setStatus('online');
-    await bot.user.setActivity(`!verify`, { type: 'PLAYING' });
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildMembers,
+    ],
 });
 
-bot.on('messageCreate', (msg) => {
-    if (msg.content === '!verify') {
-        // Crear un mensaje embed con imagen pequeña
-        const verifiedEmbed = new Discord.MessageEmbed()
-            .setTitle('**Verification successful!**')
-            .setDescription('You have been verified!')
-            .setColor('#00FF00')
-            .setThumbnail('https://cdn.discordapp.com/attachments/933093366483267655/1257802712246911047/EVOS_SUPPORT.png'); // URL de la imagen pequeña
+client.once('ready', async () => {
+    console.log(`Bot está listo como ${client.user.tag}`);
+    const channelId = '1274443859207655434'; // ID del canal
+    const roleId = '1274445003669635204'; // ID del rol
+    const channel = client.channels.cache.get(channelId);
 
-        const verifiedRole = msg.guild.roles.cache.get('945395357926424576');
-        if (msg.member && verifiedRole) {
-            msg.member.roles.add(verifiedRole)
-                .then(() => {
-                    msg.react('✅');
-                    msg.author.send({ embeds: [verifiedEmbed] })
-                        .catch(console.error);
-                    console.log('[VERIFIED] Member verified.');
-                    msg.delete({ timeout: 5000 });
-                })
-                .catch(console.error);
-        } else {
-            console.error('Member or role not found');
-        }
+    if (channel) {
+        const message = await channel.send('¡Haz clic en el check para verificarse! ✅');
+        await message.react('✅');
+
+        const filter = (reaction, user) => {
+            return reaction.emoji.name === '✅' && !user.bot;
+        };
+
+        const collector = message.createReactionCollector({ filter, dispose: true });
+
+        collector.on('collect', async (reaction, user) => {
+            const member = await reaction.message.guild.members.fetch(user.id);
+            const role = reaction.message.guild.roles.cache.get(roleId);
+            
+            if (role) {
+                await member.roles.add(role);
+                channel.send(`${user.username} ha sido verificado y se le ha asignado el rol.`);
+            }
+        });
+
+        collector.on('remove', async (reaction, user) => {
+            const member = await reaction.message.guild.members.fetch(user.id);
+            const role = reaction.message.guild.roles.cache.get(roleId);
+            
+            if (role) {
+                await member.roles.remove(role);
+                channel.send(`${user.username} ha quitado su verificación y se le ha removido el rol.`);
+            }
+        });
+    } else {
+        console.log('Canal no encontrado.');
     }
 });
 
-bot.login(process.env.TOKEN);
+client.login(process.env.DISCORD_TOKEN);

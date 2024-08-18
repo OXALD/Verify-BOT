@@ -6,52 +6,34 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.GuildMembers,
     ],
 });
 
-client.once('ready', async () => {
-    console.log(`Bot is ready as ${client.user.tag}`);
-    const channelId = '1274443859207655434'; // Channel ID
-    const roleId = '1274445003669635204'; // Role ID
-    const channel = client.channels.cache.get(channelId);
+// Mensaje de bienvenida
+const welcomeMessage = `
+Welcome to EvosHosting! 🎉
 
+With EvosHosting, you get more than just hosting. We guarantee transparency and unlimited bandwidth for your online success. Choose EvosHosting for an exceptional digital experience.
+
+**Useful Links:**
+- **Website:** [EvosHosting](https://evoshosting.com/)
+- **Client Area:** [Manage your account](https://billing.evoshosting.com/)
+- **Game Panel:** [Game server management](https://game.evoshosting.com/)
+- **Status:** [Check infrastructure status](https://status.evoshosting.com/)
+
+Feel free to explore and ask any questions!
+`;
+
+client.on('guildMemberAdd', async (member) => {
+    const channel = member.guild.channels.cache.get('1274438907223867433'); // ID del canal
     if (channel) {
-        // Enviar solo el mensaje de bienvenida y verificación
-        const message = await channel.send('Welcome to ViperHost! Click the checkmark to verify and gain access to the other channels! ✅');
-        await message.react('✅');
-
-        const filter = (reaction, user) => {
-            return reaction.emoji.name === '✅' && !user.bot;
-        };
-
-        const collector = message.createReactionCollector({ filter, dispose: true });
-
-        collector.on('collect', async (reaction, user) => {
-            const member = await reaction.message.guild.members.fetch(user.id);
-            const role = reaction.message.guild.roles.cache.get(roleId);
-
-            if (role) {
-                await member.roles.add(role);
-                await user.send(`You have been verified and given access!`);
-                // No message sent to the channel
-            }
-        });
-
-        collector.on('remove', async (reaction, user) => {
-            const member = await reaction.message.guild.members.fetch(user.id);
-            const role = reaction.message.guild.roles.cache.get(roleId);
-
-            if (role) {
-                await member.roles.remove(role);
-                await user.send(`You have revoked your verification and lost access.`);
-                // No message sent to the channel
-            }
-        });
-    } else {
-        console.log('Channel not found.');
+        await channel.send(welcomeMessage);
     }
+});
+
+client.once('ready', () => {
+    console.log(`Bot is ready as ${client.user.tag}`);
 });
 
 client.login(process.env.DISCORD_TOKEN);

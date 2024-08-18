@@ -30,20 +30,22 @@ client.once('ready', async () => {
         collector.on('collect', async (reaction, user) => {
             const member = await reaction.message.guild.members.fetch(user.id);
             const role = reaction.message.guild.roles.cache.get(roleId);
-            
+
             if (role) {
                 await member.roles.add(role);
-                channel.send(`${user.username} ha sido verificado y se le ha asignado el rol.`);
+                await user.send(`¡Has sido verificado y se te ha asignado el rol!`); // Mensaje privado al usuario
+                await channel.send(`${user.username} ha sido verificado.`);
             }
         });
 
         collector.on('remove', async (reaction, user) => {
             const member = await reaction.message.guild.members.fetch(user.id);
             const role = reaction.message.guild.roles.cache.get(roleId);
-            
+
             if (role) {
                 await member.roles.remove(role);
-                channel.send(`${user.username} ha quitado su verificación y se le ha removido el rol.`);
+                await user.send(`Has quitado tu verificación y se te ha removido el rol.`); // Mensaje privado al usuario
+                await channel.send(`${user.username} ha quitado su verificación.`);
             }
         });
     } else {

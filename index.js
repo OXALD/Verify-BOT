@@ -18,6 +18,7 @@ client.once('ready', async () => {
     const channel = client.channels.cache.get(channelId);
 
     if (channel) {
+        // Enviar solo el mensaje de bienvenida y verificación
         const message = await channel.send('Welcome to ViperHost! Click the checkmark to verify and gain access to the other channels! ✅');
         await message.react('✅');
 

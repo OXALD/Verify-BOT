@@ -26,9 +26,12 @@ Feel free to explore and ask any questions!
 `;
 
 client.on('guildMemberAdd', async (member) => {
+    console.log(`New member joined: ${member.user.tag}`); // Verificar si el evento se activa
     const channel = member.guild.channels.cache.get('1274438907223867433'); // ID del canal
     if (channel) {
         await channel.send(welcomeMessage);
+    } else {
+        console.log('Channel not found.');
     }
 });
 

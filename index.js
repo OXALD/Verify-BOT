@@ -12,13 +12,13 @@ const client = new Client({
 });
 
 client.once('ready', async () => {
-    console.log(`Bot está listo como ${client.user.tag}`);
-    const channelId = '1274443859207655434'; // ID del canal
-    const roleId = '1274445003669635204'; // ID del rol
+    console.log(`Bot is ready as ${client.user.tag}`);
+    const channelId = '1274443859207655434'; // Channel ID
+    const roleId = '1274445003669635204'; // Role ID
     const channel = client.channels.cache.get(channelId);
 
     if (channel) {
-        const message = await channel.send('¡Haz clic en el check para verificarse! ✅');
+        const message = await channel.send('Welcome to ViperHost! Click the checkmark to verify and gain access to the other channels! ✅');
         await message.react('✅');
 
         const filter = (reaction, user) => {
@@ -33,8 +33,8 @@ client.once('ready', async () => {
 
             if (role) {
                 await member.roles.add(role);
-                await user.send(`¡Has sido verificado y se te ha asignado el rol!`);
-                // No se envía el mensaje al canal
+                await user.send(`You have been verified and given access!`);
+                // No message sent to the channel
             }
         });
 
@@ -44,12 +44,12 @@ client.once('ready', async () => {
 
             if (role) {
                 await member.roles.remove(role);
-                await user.send(`Has quitado tu verificación y se te ha removido el rol.`);
-                // No se envía el mensaje al canal
+                await user.send(`You have revoked your verification and lost access.`);
+                // No message sent to the channel
             }
         });
     } else {
-        console.log('Canal no encontrado.');
+        console.log('Channel not found.');
     }
 });
 

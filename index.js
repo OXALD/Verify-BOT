@@ -10,13 +10,15 @@ const client = new Client({
 
 // Reemplaza con el ID del canal donde quieres enviar las bienvenidas
 const welcomeChannelId = 'TU_CANAL_ID';
+// Opcional: Reemplaza con el ID del servidor si deseas limitar el bot a un servidor específico
+const serverId = 'TU_SERVER_ID';  // Opcional
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
-
+    
     // Lista los servidores a los que está conectado el bot
     client.guilds.cache.forEach(guild => {
-        console.log(`Connected to server: ${guild.name}`);
+        console.log(`Connected to server: ${guild.name} (ID: ${guild.id})`);
     });
 
     // Verifica si el ID del canal es correcto
@@ -24,6 +26,9 @@ client.on('ready', () => {
 });
 
 client.on('guildMemberAdd', member => {
+    // Opcional: Verifica que el bot esté en el servidor correcto
+    if (serverId && member.guild.id !== serverId) return;
+
     console.log(`New member joined: ${member.user.tag}`);
 
     // Obtén el canal por ID
@@ -31,6 +36,8 @@ client.on('guildMemberAdd', member => {
     if (!channel) {
         console.log('Channel not found or bot lacks access');
         return;
+    } else {
+        console.log(`Channel found: ${channel.name}`);
     }
 
     // Mensaje de bienvenida
@@ -54,7 +61,12 @@ Check the status of our infrastructure in real-time.
 `;
 
     // Envía el mensaje de bienvenida
-    channel.send(`${member}, ${welcomeMessage}`).catch(console.error);
+    channel.send(`${member}, ${welcomeMessage}`).then(() => {
+        console.log('Welcome message sent');
+    }).catch(err => {
+        console.error('Failed to send message:', err);
+    });
 });
 
+// Reemplaza con el token de tu bot
 client.login('YOUR_BOT_TOKEN');

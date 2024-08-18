@@ -1,49 +1,37 @@
-require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMembers,
-    ],
+// Reemplaza con el ID del canal donde quieres enviar las bienvenidas
+const welcomeChannelId = 'TU_CANAL_ID';
+
+client.on('ready', () => {
+    console.log(`Logged in as ${client.user.tag}!`);
 });
 
-// Mensaje de bienvenida
-const welcomeMessage = `
-Welcome to EvosHosting! 🎉
+client.on('guildMemberAdd', member => {
+    const channel = member.guild.channels.cache.get(welcomeChannelId);
+    if (!channel) return;
 
+    const welcomeMessage = `
+**Welcome in EvosHosting**
 With EvosHosting, you get more than just hosting. We guarantee transparency and unlimited bandwidth for your online success. Choose EvosHosting for an exceptional digital experience.
 
-**Useful Links:**
-- **Website:** [EvosHosting](https://evoshosting.com/)
-- **Client Area:** [Manage your account](https://billing.evoshosting.com/)
-- **Game Panel:** [Game server management](https://game.evoshosting.com/)
-- **Status:** [Check infrastructure status](https://status.evoshosting.com/)
+**Useful Links**
 
-Feel free to explore and ask any questions!
+**Website:** https://evoshosting.com/
+Check our plans and find the best solution.
+
+**Client Area:** https://billing.evoshosting.com/
+Manage bills, payments, renewals, and your servers.
+
+**Game Panel:** https://game.evoshosting.com/
+Manage panel for games servers.
+
+**Status:** https://status.evoshosting.com/
+Check the status of our infrastructure in real-time.
 `;
 
-client.on('guildMemberAdd', async (member) => {
-    console.log(`New member joined: ${member.user.tag}`);
-    const channel = member.guild.channels.cache.get('1274438907223867433'); // ID del canal
-    
-    if (channel) {
-        console.log('Channel found, sending message...');
-        try {
-            await channel.send(welcomeMessage);
-            console.log('Message sent successfully!');
-        } catch (error) {
-            console.error('Error sending message:', error);
-        }
-    } else {
-        console.log('Channel not found.');
-    }
+    channel.send(`${member}, ${welcomeMessage}`);
 });
 
-client.once('ready', () => {
-    console.log(`Bot is ready as ${client.user.tag}`);
-});
-
-client.login(process.env.DISCORD_TOKEN);
+client.login('YOUR_BOT_TOKEN');

@@ -23,13 +23,24 @@ client.on('ready', () => {
 
     // Verifica si el ID del canal es correcto
     console.log(`Welcome channel ID: ${welcomeChannelId}`);
+
+    // Prueba enviar un mensaje de prueba a otro canal
+    const testChannelId = 'OTRO_CANAL_ID';  // Reemplaza con un canal donde el bot pueda enviar mensajes
+    const testChannel = client.channels.cache.get(testChannelId);
+    if (testChannel) {
+        testChannel.send('This is a test message from the bot!')
+            .then(() => console.log('Test message sent to other channel'))
+            .catch(err => console.error('Failed to send test message to other channel:', err));
+    } else {
+        console.log('Test channel not found');
+    }
 });
 
 client.on('guildMemberAdd', member => {
     // Opcional: Verifica que el bot esté en el servidor correcto
     if (serverId && member.guild.id !== serverId) return;
 
-    console.log(`New member joined: ${member.user.tag}`);
+    console.log(`New member joined: ${member.user.tag} (ID: ${member.id})`);
 
     // Obtén el canal por ID
     const channel = member.guild.channels.cache.get(welcomeChannelId);

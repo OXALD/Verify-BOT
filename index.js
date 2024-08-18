@@ -26,10 +26,17 @@ Feel free to explore and ask any questions!
 `;
 
 client.on('guildMemberAdd', async (member) => {
-    console.log(`New member joined: ${member.user.tag}`); // Verificar si el evento se activa
+    console.log(`New member joined: ${member.user.tag}`);
     const channel = member.guild.channels.cache.get('1274438907223867433'); // ID del canal
+    
     if (channel) {
-        await channel.send(welcomeMessage);
+        console.log('Channel found, sending message...');
+        try {
+            await channel.send(welcomeMessage);
+            console.log('Message sent successfully!');
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
     } else {
         console.log('Channel not found.');
     }
